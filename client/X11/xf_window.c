@@ -399,6 +399,28 @@ xfWindow* xf_CreateDesktopWindow(xfContext* xfc, char *name, int width, int heig
 		}
 
 		XStoreName(xfc->display, window->handle, name);
+
+
+#define _NET_WM_STATE_ADD           1    /* add/set property */
+
+Display* dpy = xfc->display;
+XEvent xev;
+Atom wm_state  =  XInternAtom(dpy, "_NET_WM_STATE", False);
+Atom max_horz  =  XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+Atom max_vert  =  XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+
+memset(&xev, 0, sizeof(xev));
+xev.type = ClientMessage;
+xev.xclient.window = window->handle;
+xev.xclient.message_type = wm_state;
+xev.xclient.format = 32;
+xev.xclient.data.l[0] = _NET_WM_STATE_ADD;
+xev.xclient.data.l[1] = max_horz;
+xev.xclient.data.l[2] = max_vert;
+
+XSendEvent(dpy, DefaultRootWindow(dpy), False, SubstructureNotifyMask, &xev);
+
+
 	}
 
 	return window;
@@ -413,8 +435,10 @@ void xf_ResizeDesktopWindow(xfContext* xfc, xfWindow* window, int width, int hei
 	{
 		size_hints->flags = PMinSize | PMaxSize;
 
-		size_hints->min_width = size_hints->max_width = width;
-		size_hints->min_height = size_hints->max_height = height;
+		size_hints->min_width = size_hints->max_width = width-100;
+		size_hints->min_height = size_hints->max_height = height-100;
+		size_hints->max_width = 9000;
+		size_hints->max_height = 9000;
 
 #ifdef WITH_XRENDER
 		if (xfc->settings->SmartSizing)
