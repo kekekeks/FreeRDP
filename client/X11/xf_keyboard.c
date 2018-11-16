@@ -459,7 +459,15 @@ BOOL xf_keyboard_handle_special_keys(xfContext* xfc, KeySym keysym)
 			}
 		}
 	}
-
+	if(mod.Super)
+	{
+		XUngrabKeyboard(xfc->display, CurrentTime);
+	}
+	if(mod.Alt && keysym==XK_F2)
+	{
+		XUngrabKeyboard(xfc->display, CurrentTime);
+		return TRUE;
+	}
 	if ((keysym == XK_c) || (keysym == XK_C))
 	{
 		if (mod.Ctrl && mod.Alt)
